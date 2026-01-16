@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Intuit_Clientes.props" />
+</Project>
