@@ -6,13 +6,15 @@ using Intuit_Clientes.Services;
 using Moq;
 using NUnit.Framework;
 using Microsoft.Extensions.Logging;
+using Intuit_Clientes.Mappings;
+using Castle.Core.Resource;
 
 namespace Intuit_Clientes.Tests.Services
 {
     [TestFixture]
     public class CustomerServiceTests
     {
-        private Mock<IMapper> _mapperMock;
+        private IMapper _mapper;
         private Mock<ICustomerRepository> _customerRepositoryMock;
         private CustomerService _customerService;
         private Mock<ILogger<CustomerService>> _loggerMock;
@@ -20,10 +22,20 @@ namespace Intuit_Clientes.Tests.Services
         [SetUp]
         public void Setup()
         {
-            _mapperMock = new Mock<IMapper>();
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+            _mapper = config.CreateMapper();
+
             _customerRepositoryMock = new Mock<ICustomerRepository>();
             _loggerMock = new Mock<ILogger<CustomerService>>();
-            _customerService = new CustomerService(_mapperMock.Object, _customerRepositoryMock.Object, _loggerMock.Object);
+
+            // 2. Inyectamos el Mapper REAL
+            _customerService = new CustomerService(
+                _mapper,
+                _customerRepositoryMock.Object,
+                _loggerMock.Object);
         }
 
         #region GetCustomersAsync Tests
@@ -48,10 +60,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetAllAsync())
                 .ReturnsAsync(customers);
 
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(customers))
-                .Returns(customersDTO);
-
             // Act
             var result = await _customerService.GetCustomersAsync();
 
@@ -61,7 +69,6 @@ namespace Intuit_Clientes.Tests.Services
             Assert.That(result[0].Nombre, Is.EqualTo("Juan"));
             Assert.That(result[1].Nombre, Is.EqualTo("María"));
             _customerRepositoryMock.Verify(x => x.GetAllAsync(), Times.Once);
-            _mapperMock.Verify(x => x.Map<List<CustomerDTO>>(customers), Times.Once);
         }
 
         [Test]
@@ -74,10 +81,6 @@ namespace Intuit_Clientes.Tests.Services
             _customerRepositoryMock
                 .Setup(x => x.GetAllAsync())
                 .ReturnsAsync(emptyCustomers);
-
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(emptyCustomers))
-                .Returns(emptyCustomersDTO);
 
             // Act
             var result = await _customerService.GetCustomersAsync();
@@ -129,10 +132,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetByIdAsync(customerId))
                 .ReturnsAsync(customer);
 
-            _mapperMock
-                .Setup(x => x.Map<CustomerDTO>(customer))
-                .Returns(customerDTO);
-
             // Act
             var result = await _customerService.GetByIdAsync(customerId);
 
@@ -152,10 +151,6 @@ namespace Intuit_Clientes.Tests.Services
             _customerRepositoryMock
                 .Setup(x => x.GetByIdAsync(invalidId))
                 .ReturnsAsync((Customer)null);
-
-            _mapperMock
-                .Setup(x => x.Map<CustomerDTO>(It.IsAny<Customer>()))
-                .Returns((CustomerDTO)null);
 
             // Act
             var result = await _customerService.GetByIdAsync(invalidId);
@@ -194,29 +189,15 @@ namespace Intuit_Clientes.Tests.Services
                 CUIT = "20-12345678-9"
             };
 
-            var customer = new Customer
-            {
-                Nombre = "Juan",
-                Apellido = "Pérez",
-                Email = "juan@example.com",
-                CUIT = "20-12345678-9"
-            };
-
             var createdCustomer = new Customer
             {
                 Id = 1,
                 Nombre = "Juan",
-                Apellido = "Pérez",
-                Email = "juan@example.com",
-                CUIT = "20-12345678-9"
+                Apellido = "Pérez"
             };
 
-            _mapperMock
-                .Setup(x => x.Map<Customer>(customerCreateDTO))
-                .Returns(customer);
-
             _customerRepositoryMock
-                .Setup(x => x.Create(customer))
+                .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ReturnsAsync(createdCustomer);
 
             // Act
@@ -225,8 +206,6 @@ namespace Intuit_Clientes.Tests.Services
             // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo(1));
-            _mapperMock.Verify(x => x.Map<Customer>(customerCreateDTO), Times.Once);
-            _customerRepositoryMock.Verify(x => x.Create(customer), Times.Once);
         }
 
         [Test]
@@ -244,10 +223,6 @@ namespace Intuit_Clientes.Tests.Services
             var customer = new Customer();
             var createdCustomer = new Customer { Id = 2 };
 
-            _mapperMock
-                .Setup(x => x.Map<Customer>(customerCreateDTO))
-                .Returns(customer);
-
             _customerRepositoryMock
                 .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ReturnsAsync(createdCustomer);
@@ -257,7 +232,6 @@ namespace Intuit_Clientes.Tests.Services
 
             // Assert
             Assert.That(result, Is.EqualTo(2));
-            _mapperMock.Verify(x => x.Map<Customer>(customerCreateDTO), Times.Once);
         }
 
         [Test]
@@ -271,10 +245,6 @@ namespace Intuit_Clientes.Tests.Services
             };
 
             var customer = new Customer();
-
-            _mapperMock
-                .Setup(x => x.Map<Customer>(customerCreateDTO))
-                .Returns(customer);
 
             _customerRepositoryMock
                 .Setup(x => x.Create(customer))
@@ -296,10 +266,6 @@ namespace Intuit_Clientes.Tests.Services
                 Nombre = "Test",
                 Apellido = "User"
             };
-
-            _mapperMock
-                .Setup(x => x.Map<Customer>(It.IsAny<CustomerCreateDTO>()))
-                .Returns(new Customer());
 
             _customerRepositoryMock
                 .Setup(x => x.Create(It.IsAny<Customer>()))
@@ -628,10 +594,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
 
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(customers))
-                .Returns(customersDTO);
-
             // Act
             var result = await _customerService.Search(searchParam);
 
@@ -654,10 +616,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(emptyCustomers);
 
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(emptyCustomers))
-                .Returns(emptyCustomersDTO);
-
             // Act
             var result = await _customerService.Search(searchParam);
 
@@ -678,10 +636,6 @@ namespace Intuit_Clientes.Tests.Services
             _customerRepositoryMock
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
-
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(customers))
-                .Returns(customersDTO);
 
             // Act
             var result = await _customerService.Search(searchParam);
@@ -722,10 +676,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
 
-            _mapperMock
-                .Setup(x => x.Map<List<CustomerDTO>>(customers))
-                .Returns(customersDTO);
-
             // Act
             var result = await _customerService.Search(searchParam);
 
@@ -733,7 +683,6 @@ namespace Intuit_Clientes.Tests.Services
             Assert.That(result[0].Id, Is.EqualTo(1));
             Assert.That(result[0].Nombre, Is.EqualTo("Juan"));
             Assert.That(result[0].Email, Is.EqualTo("juan@example.com"));
-            _mapperMock.Verify(x => x.Map<List<CustomerDTO>>(customers), Times.Once);
         }
 
         [Test]
@@ -794,10 +743,6 @@ namespace Intuit_Clientes.Tests.Services
         {
             // Arrange
             CustomerCreateDTO nullDTO = null;
-
-            _mapperMock
-                .Setup(x => x.Map<Customer>(nullDTO))
-                .Returns((Customer)null);
 
             _customerRepositoryMock
                 .Setup(x => x.Create(It.IsAny<Customer>()))
