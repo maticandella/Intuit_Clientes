@@ -15,7 +15,8 @@ Se aplicó una arquitectura por capas siguiendo principios **SOLID** para garant
 * AutoMapper (Mapeo de DTOs)
 * FluentValidation (Validaciones de negocio)
 * NUnit & Moq (Unit Testing)
-* SonarQube (Calidad de código)
+* SonarCloud (Calidad de código)
+* GitHub Actions
 
 ## 🧪 Tests
 Para ejecutar las pruebas unitarias:
