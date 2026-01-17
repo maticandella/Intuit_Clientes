@@ -5,19 +5,16 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B406EA60-B833-4D13-A337-CD120E832C6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intuit_Clientes", "src\Intuit_Clientes\Intuit_Clientes.csproj", "{A48135C0-1DBB-4D7A-8861-A2D14D381014}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Intuit_Clientes", "src\Intuit_Clientes\Intuit_Clientes.csproj", "{A48135C0-1DBB-4D7A-8861-A2D14D381014}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1D1940C6-D840-4DBA-B99F-CFF659EFB5C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intuit_Clientes.Tests", "tests\Intuit_Clientes.Tests\Intuit_Clientes.Tests.csproj", "{55091953-CF99-4C70-A887-47FE27DEB78F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Intuit_Clientes.Tests", "tests\Intuit_Clientes.Tests\Intuit_Clientes.Tests.csproj", "{55091953-CF99-4C70-A887-47FE27DEB78F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A48135C0-1DBB-4D7A-8861-A2D14D381014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -28,6 +25,9 @@ Global
 		{55091953-CF99-4C70-A887-47FE27DEB78F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55091953-CF99-4C70-A887-47FE27DEB78F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55091953-CF99-4C70-A887-47FE27DEB78F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A48135C0-1DBB-4D7A-8861-A2D14D381014} = {B406EA60-B833-4D13-A337-CD120E832C6A}
