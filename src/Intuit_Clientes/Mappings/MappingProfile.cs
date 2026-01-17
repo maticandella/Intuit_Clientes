@@ -11,7 +11,9 @@ namespace Intuit_Clientes.Mappings
             CreateMap<Customer, CustomerDTO>().ReverseMap();
             CreateMap<CustomerCommandDTO, Customer>();
             CreateMap<CustomerCreateDTO, Customer>();
-            CreateMap<CustomerUpdateDTO, Customer>();
+            CreateMap<CustomerUpdateDTO, Customer>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.FechaCreacion, opt => opt.Ignore());
         }
     }
 }

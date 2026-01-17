@@ -1,13 +1,11 @@
 using AutoMapper;
-using FluentValidation.Results;
 using Intuit_Clientes.Data.Abstractions;
 using Intuit_Clientes.Domain;
 using Intuit_Clientes.DTO;
 using Intuit_Clientes.Services;
-using Intuit_Clientes.Utils;
 using Moq;
 using NUnit.Framework;
-using OneOf;
+using Microsoft.Extensions.Logging;
 
 namespace Intuit_Clientes.Tests.Services
 {
@@ -17,13 +15,15 @@ namespace Intuit_Clientes.Tests.Services
         private Mock<IMapper> _mapperMock;
         private Mock<ICustomerRepository> _customerRepositoryMock;
         private CustomerService _customerService;
+        private Mock<ILogger<CustomerService>> _loggerMock;
 
         [SetUp]
         public void Setup()
         {
             _mapperMock = new Mock<IMapper>();
             _customerRepositoryMock = new Mock<ICustomerRepository>();
-            _customerService = new CustomerService(_mapperMock.Object, _customerRepositoryMock.Object);
+            _loggerMock = new Mock<ILogger<CustomerService>>();
+            _customerService = new CustomerService(_mapperMock.Object, _customerRepositoryMock.Object, _loggerMock.Object);
         }
 
         #region GetCustomersAsync Tests
@@ -337,7 +337,7 @@ namespace Intuit_Clientes.Tests.Services
             };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -352,7 +352,7 @@ namespace Intuit_Clientes.Tests.Services
             Assert.That(result.AsT0, Is.EqualTo(customerId));
             Assert.That(existingCustomer.Nombre, Is.EqualTo(customerUpdateDTO.Nombre));
             Assert.That(existingCustomer.Email, Is.EqualTo(customerUpdateDTO.Email));
-            _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
+            _customerRepositoryMock.Verify(x => x.GetByIdForOperationsAsync(customerId), Times.Once);
             _customerRepositoryMock.Verify(x => x.Update(existingCustomer), Times.Once);
         }
 
@@ -381,7 +381,7 @@ namespace Intuit_Clientes.Tests.Services
             };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -415,7 +415,7 @@ namespace Intuit_Clientes.Tests.Services
             };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
             // Act
@@ -426,7 +426,7 @@ namespace Intuit_Clientes.Tests.Services
             var errors = result.AsT1;
             Assert.That(errors, Is.Not.Empty);
             Assert.That(errors.Any(e => e.ErrorMessage.Contains("no existe")), Is.True);
-            _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
+            _customerRepositoryMock.Verify(x => x.GetByIdForOperationsAsync(customerId), Times.Once);
             _customerRepositoryMock.Verify(x => x.Update(It.IsAny<Customer>()), Times.Never);
         }
 
@@ -453,7 +453,7 @@ namespace Intuit_Clientes.Tests.Services
             var beforeUpdate = DateTime.Now;
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -485,7 +485,7 @@ namespace Intuit_Clientes.Tests.Services
             var existingCustomer = new Customer { Id = customerId };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -513,7 +513,7 @@ namespace Intuit_Clientes.Tests.Services
             };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -526,7 +526,7 @@ namespace Intuit_Clientes.Tests.Services
             // Assert
             Assert.That(result.IsT0, Is.True);
             Assert.That(result.AsT0, Is.EqualTo(customerId));
-            _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
+            _customerRepositoryMock.Verify(x => x.GetByIdForOperationsAsync(customerId), Times.Once);
             _customerRepositoryMock.Verify(x => x.Delete(existingCustomer), Times.Once);
         }
 
@@ -537,7 +537,7 @@ namespace Intuit_Clientes.Tests.Services
             var customerId = 999;
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
             // Act
@@ -548,7 +548,7 @@ namespace Intuit_Clientes.Tests.Services
             var errors = result.AsT1;
             Assert.That(errors, Is.Not.Empty);
             Assert.That(errors.Any(e => e.ErrorMessage.Contains("no existe")), Is.True);
-            _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
+            _customerRepositoryMock.Verify(x => x.GetByIdForOperationsAsync(customerId), Times.Once);
             _customerRepositoryMock.Verify(x => x.Delete(It.IsAny<Customer>()), Times.Never);
         }
 
@@ -567,7 +567,7 @@ namespace Intuit_Clientes.Tests.Services
             Customer capturedCustomer = null;
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock
@@ -592,7 +592,7 @@ namespace Intuit_Clientes.Tests.Services
             var existingCustomer = new Customer { Id = customerId };
 
             _customerRepositoryMock
-                .Setup(x => x.GetByIdAsync(customerId))
+                .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync(existingCustomer);
 
             _customerRepositoryMock

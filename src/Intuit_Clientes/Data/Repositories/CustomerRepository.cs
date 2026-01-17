@@ -16,10 +16,12 @@ namespace Intuit_Clientes.Data.Repositories
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
-            return await _customers.ToListAsync();
+            return await _customers.AsNoTracking().ToListAsync();
         }
 
         public async Task<Customer?> GetByIdAsync(int id) => await _customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+
+        public async Task<Customer?> GetByIdForOperationsAsync(int id) => await _customers.FirstOrDefaultAsync(c => c.Id == id);
 
         public async Task<Customer> Create(Customer command)
         {
