@@ -31,7 +31,6 @@ namespace Intuit_Clientes.Tests.Services
             _customerRepositoryMock = new Mock<ICustomerRepository>();
             _loggerMock = new Mock<ILogger<CustomerService>>();
 
-            // 2. Inyectamos el Mapper REAL
             _customerService = new CustomerService(
                 _mapper,
                 _customerRepositoryMock.Object,
@@ -43,7 +42,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task GetCustomersAsync_WhenCalled_ReturnsListOfCustomers()
         {
-            // Arrange
             var customers = new List<Customer>
             {
                 new Customer { Id = 1, Nombre = "Juan", Apellido = "Pérez" },
@@ -60,10 +58,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetAllAsync())
                 .ReturnsAsync(customers);
 
-            // Act
             var result = await _customerService.GetCustomersAsync();
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Nombre, Is.EqualTo("Juan"));
@@ -74,7 +70,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task GetCustomersAsync_WhenNoCustomers_ReturnsEmptyList()
         {
-            // Arrange
             var emptyCustomers = new List<Customer>();
             var emptyCustomersDTO = new List<CustomerDTO>();
 
@@ -82,10 +77,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetAllAsync())
                 .ReturnsAsync(emptyCustomers);
 
-            // Act
             var result = await _customerService.GetCustomersAsync();
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.Empty);
             _customerRepositoryMock.Verify(x => x.GetAllAsync(), Times.Once);
@@ -94,12 +87,10 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public void GetCustomersAsync_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             _customerRepositoryMock
                 .Setup(x => x.GetAllAsync())
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.GetCustomersAsync());
         }
 
@@ -110,7 +101,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task GetByIdAsync_WithValidId_ReturnsCustomer()
         {
-            // Arrange
             var customerId = 1;
             var customer = new Customer
             {
@@ -132,10 +122,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetByIdAsync(customerId))
                 .ReturnsAsync(customer);
 
-            // Act
             var result = await _customerService.GetByIdAsync(customerId);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(customerId));
             Assert.That(result.Nombre, Is.EqualTo("Juan"));
@@ -145,17 +133,14 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task GetByIdAsync_WithInvalidId_ReturnsNull()
         {
-            // Arrange
             var invalidId = 999;
 
             _customerRepositoryMock
                 .Setup(x => x.GetByIdAsync(invalidId))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.GetByIdAsync(invalidId);
 
-            // Assert
             Assert.That(result, Is.Null);
             _customerRepositoryMock.Verify(x => x.GetByIdAsync(invalidId), Times.Once);
         }
@@ -163,13 +148,11 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public void GetByIdAsync_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             var customerId = 1;
             _customerRepositoryMock
                 .Setup(x => x.GetByIdAsync(customerId))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.GetByIdAsync(customerId));
         }
 
@@ -180,7 +163,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Create_WithValidData_ReturnsCustomerId()
         {
-            // Arrange
             var customerCreateDTO = new CustomerCreateDTO
             {
                 Nombre = "Juan",
@@ -200,10 +182,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ReturnsAsync(createdCustomer);
 
-            // Act
             var result = await _customerService.Create(customerCreateDTO);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo(1));
         }
@@ -211,7 +191,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Create_WithValidData_MapsCorrectly()
         {
-            // Arrange
             var customerCreateDTO = new CustomerCreateDTO
             {
                 Nombre = "María",
@@ -227,17 +206,14 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ReturnsAsync(createdCustomer);
 
-            // Act
             var result = await _customerService.Create(customerCreateDTO);
 
-            // Assert
             Assert.That(result, Is.EqualTo(2));
         }
 
         [Test]
         public async Task Create_WhenRepositoryReturnsNull_ReturnsNull()
         {
-            // Arrange
             var customerCreateDTO = new CustomerCreateDTO
             {
                 Nombre = "Test",
@@ -250,17 +226,14 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Create(customer))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.Create(customerCreateDTO);
 
-            // Assert
             Assert.That(result, Is.Null);
         }
 
         [Test]
         public void Create_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             var customerCreateDTO = new CustomerCreateDTO
             {
                 Nombre = "Test",
@@ -271,7 +244,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.Create(customerCreateDTO));
         }
 
@@ -282,7 +254,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Update_WithValidData_ReturnsCustomerId()
         {
-            // Arrange
             var customerId = 1;
             var customerUpdateDTO = new CustomerUpdateDTO
             {
@@ -310,10 +281,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Update(It.IsAny<Customer>()))
                 .ReturnsAsync(customerId);
 
-            // Act
             var result = await _customerService.Update(customerId, customerUpdateDTO);
 
-            // Assert
             Assert.That(result.IsT0, Is.True);
             Assert.That(result.AsT0, Is.EqualTo(customerId));
             Assert.That(existingCustomer.Nombre, Is.EqualTo(customerUpdateDTO.Nombre));
@@ -325,7 +294,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Update_UpdatesAllFields_Correctly()
         {
-            // Arrange
             var customerId = 1;
             var customerUpdateDTO = new CustomerUpdateDTO
             {
@@ -354,10 +322,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Update(It.IsAny<Customer>()))
                 .ReturnsAsync(customerId);
 
-            // Act
             var result = await _customerService.Update(customerId, customerUpdateDTO);
 
-            // Assert
             Assert.That(result.IsT0, Is.True);
             Assert.That(existingCustomer.Nombre, Is.EqualTo(customerUpdateDTO.Nombre));
             Assert.That(existingCustomer.Apellido, Is.EqualTo(customerUpdateDTO.Apellido));
@@ -372,7 +338,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Update_WithNonExistentCustomer_ReturnsValidationErrors()
         {
-            // Arrange
             var customerId = 999;
             var customerUpdateDTO = new CustomerUpdateDTO
             {
@@ -384,10 +349,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.Update(customerId, customerUpdateDTO);
 
-            // Assert
             Assert.That(result.IsT1, Is.True);
             var errors = result.AsT1;
             Assert.That(errors, Is.Not.Empty);
@@ -399,7 +362,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Update_SetsFechaModificacion_ToCurrentDateTime()
         {
-            // Arrange
             var customerId = 1;
             var customerUpdateDTO = new CustomerUpdateDTO
             {
@@ -426,11 +388,9 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Update(It.IsAny<Customer>()))
                 .ReturnsAsync(customerId);
 
-            // Act
             var result = await _customerService.Update(customerId, customerUpdateDTO);
             var afterUpdate = DateTime.Now;
 
-            // Assert
             Assert.That(result.IsT0, Is.True);
             Assert.That(existingCustomer.FechaModificacion, Is.Not.Null);
             Assert.That(existingCustomer.FechaModificacion.Value, Is.GreaterThanOrEqualTo(beforeUpdate));
@@ -440,7 +400,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public void Update_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             var customerId = 1;
             var customerUpdateDTO = new CustomerUpdateDTO
             {
@@ -458,7 +417,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Update(It.IsAny<Customer>()))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.Update(customerId, customerUpdateDTO));
         }
 
@@ -469,7 +427,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Delete_WithValidId_ReturnsCustomerId()
         {
-            // Arrange
             var customerId = 1;
             var existingCustomer = new Customer
             {
@@ -486,10 +443,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Delete(existingCustomer))
                 .ReturnsAsync(customerId);
 
-            // Act
             var result = await _customerService.Delete(customerId);
 
-            // Assert
             Assert.That(result.IsT0, Is.True);
             Assert.That(result.AsT0, Is.EqualTo(customerId));
             _customerRepositoryMock.Verify(x => x.GetByIdForOperationsAsync(customerId), Times.Once);
@@ -499,17 +454,14 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Delete_WithNonExistentCustomer_ReturnsValidationErrors()
         {
-            // Arrange
             var customerId = 999;
 
             _customerRepositoryMock
                 .Setup(x => x.GetByIdForOperationsAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.Delete(customerId);
 
-            // Assert
             Assert.That(result.IsT1, Is.True);
             var errors = result.AsT1;
             Assert.That(errors, Is.Not.Empty);
@@ -521,7 +473,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Delete_CallsRepositoryWithCorrectCustomer()
         {
-            // Arrange
             var customerId = 1;
             var existingCustomer = new Customer
             {
@@ -541,10 +492,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Callback<Customer>(c => capturedCustomer = c)
                 .ReturnsAsync(customerId);
 
-            // Act
             await _customerService.Delete(customerId);
 
-            // Assert
             Assert.That(capturedCustomer, Is.Not.Null);
             Assert.That(capturedCustomer.Id, Is.EqualTo(customerId));
             Assert.That(capturedCustomer.Nombre, Is.EqualTo("Test"));
@@ -553,7 +502,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public void Delete_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             var customerId = 1;
             var existingCustomer = new Customer { Id = customerId };
 
@@ -565,7 +513,6 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Delete(It.IsAny<Customer>()))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.Delete(customerId));
         }
 
@@ -576,7 +523,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Search_WithValidParam_ReturnsMatchingCustomers()
         {
-            // Arrange
             var searchParam = "Juan";
             var customers = new List<Customer>
             {
@@ -594,10 +540,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
 
-            // Act
             var result = await _customerService.Search(searchParam);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result.All(c => c.Nombre == "Juan"), Is.True);
@@ -607,7 +551,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Search_WithNoMatches_ReturnsEmptyList()
         {
-            // Arrange
             var searchParam = "NoExiste";
             var emptyCustomers = new List<Customer>();
             var emptyCustomersDTO = new List<CustomerDTO>();
@@ -616,10 +559,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(emptyCustomers);
 
-            // Act
             var result = await _customerService.Search(searchParam);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.Empty);
             _customerRepositoryMock.Verify(x => x.SearchByNameWithSpAsync(searchParam), Times.Once);
@@ -628,7 +569,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Search_WithEmptyString_CallsRepository()
         {
-            // Arrange
             var searchParam = "";
             var customers = new List<Customer>();
             var customersDTO = new List<CustomerDTO>();
@@ -637,10 +577,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
 
-            // Act
             var result = await _customerService.Search(searchParam);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             _customerRepositoryMock.Verify(x => x.SearchByNameWithSpAsync(searchParam), Times.Once);
         }
@@ -648,7 +586,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Search_MapsResultsCorrectly()
         {
-            // Arrange
             var searchParam = "Pérez";
             var customers = new List<Customer>
             {
@@ -676,10 +613,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ReturnsAsync(customers);
 
-            // Act
             var result = await _customerService.Search(searchParam);
 
-            // Assert
             Assert.That(result[0].Id, Is.EqualTo(1));
             Assert.That(result[0].Nombre, Is.EqualTo("Juan"));
             Assert.That(result[0].Email, Is.EqualTo("juan@example.com"));
@@ -688,13 +623,11 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public void Search_WhenRepositoryThrowsException_ThrowsException()
         {
-            // Arrange
             var searchParam = "Test";
             _customerRepositoryMock
                 .Setup(x => x.SearchByNameWithSpAsync(searchParam))
                 .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
             Assert.ThrowsAsync<Exception>(async () => await _customerService.Search(searchParam));
         }
 
@@ -705,7 +638,6 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Update_PreservesExistingIdAndCreationDate()
         {
-            // Arrange
             var customerId = 1;
             var originalCreationDate = DateTime.Now.AddYears(-1);
             var customerUpdateDTO = new CustomerUpdateDTO
@@ -730,10 +662,8 @@ namespace Intuit_Clientes.Tests.Services
                 .Setup(x => x.Update(It.IsAny<Customer>()))
                 .ReturnsAsync(customerId);
 
-            // Act
             await _customerService.Update(customerId, customerUpdateDTO);
 
-            // Assert
             Assert.That(existingCustomer.Id, Is.EqualTo(customerId));
             Assert.That(existingCustomer.FechaCreacion, Is.EqualTo(originalCreationDate));
         }
@@ -741,34 +671,28 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task Create_WithNullDTO_ReturnsNull()
         {
-            // Arrange
             CustomerCreateDTO nullDTO = null;
 
             _customerRepositoryMock
                 .Setup(x => x.Create(It.IsAny<Customer>()))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.Create(nullDTO);
 
-            // Assert
             Assert.That(result, Is.Null);
         }
 
         [Test]
         public async Task GetByIdAsync_WithZeroId_CallsRepository()
         {
-            // Arrange
             var customerId = 0;
 
             _customerRepositoryMock
                 .Setup(x => x.GetByIdAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.GetByIdAsync(customerId);
 
-            // Assert
             Assert.That(result, Is.Null);
             _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
         }
@@ -776,17 +700,14 @@ namespace Intuit_Clientes.Tests.Services
         [Test]
         public async Task GetByIdAsync_WithNegativeId_CallsRepository()
         {
-            // Arrange
             var customerId = -1;
 
             _customerRepositoryMock
                 .Setup(x => x.GetByIdAsync(customerId))
                 .ReturnsAsync((Customer)null);
 
-            // Act
             var result = await _customerService.GetByIdAsync(customerId);
 
-            // Assert
             _customerRepositoryMock.Verify(x => x.GetByIdAsync(customerId), Times.Once);
         }
 
